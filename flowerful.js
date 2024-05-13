@@ -14,7 +14,6 @@ const flower = {
     logger: {},
 };
 
-
 //This is what is sent to plugins when registering
 const flowerAPI =
 {
@@ -26,24 +25,6 @@ var GameMain = {};
 
 //All plugins live here
 var Plugins = {};
-
-//Contains the new hooked code for hooked methods
-var hookMethods = {
-    startNewGame: function (a, b, c) {
-        //This = tGameMain;
-
-        //Prefix
-        //Nothing
-
-        //PatchTemp Orig
-        this._patchTemp = origMethods.startNewGame;
-        this._patchTemp(a, b, c);
-        this._patchTemp = null;
-
-        //Postfix
-        WriteLog("New game started");
-    }
-};
 
 //#endregion flower_ctor
 
@@ -61,20 +42,57 @@ function GetGameMain() {
     return GameMain;
 }
 
-function LoadAllPlugins() {
+async function LoadAllPlugins() {
     const fs = require('fs');
     const plugin_dir = nw.global.__dirname + "/gamedata/game/js/game/flower-plugins/";
 
-    fs.readdir(plugin_dir, {}, function (err, files) {
-        WriteLog(`Loading ${files.length} plugins`);
-        for (let i = 0; i < files.length; i++) {
-            WriteLog(`File: ${files[i]}`);
-            LoadPlugin(files[i]);
-        }
-    });
+    var files = fs.readdirSync(plugin_dir, {})
+    WriteLog(`Loading ${files.length} plugins`);
+
+    for (var file of files) {
+        WriteLog(`File: ${file}`);
+        await LoadPlugin(file);
+    }
+
+    WriteLog(`Running awakes for plugins`);
+
+    for (var guid in Plugins) {
+        Plugins[guid].PluginAwake();
+    }
 }
 
-function LoadPlugin(file) {
+async function LoadPlugin(file) {
+    const filePath = `./flower-plugins/${file}`
+    WriteLog(`Importing ${filePath}`);
+
+    try {
+
+        const plugin = (await import(filePath)).default;
+
+        if (!Plugins[plugin.GUID]) {
+            //Squawk
+            WriteLog(`Registering ${plugin.GUID}`);
+            WriteLog(`String: ${JSON.stringify(plugin)}`);
+            //Store the plugin for later
+            Plugins[plugin.GUID] = plugin;
+
+            //Tell the plugin it is being registered and pass it the API/Logger
+            plugin.PluginRegistered(flowerAPI, new LogSource(plugin.GUID));
+        }
+        else {
+            throw new error("Duplicate plugin loaded");
+        }
+
+    }
+    catch (e) {
+        WriteLog(`Error loading: ${e.message}`);
+        return;
+    }
+
+}
+
+/*
+function LoadPlugin_Old(file) {
     //load from the basedir of the DOM not the app
     const filePath = `./js/game/flower-plugins/${file}`;
 
@@ -97,6 +115,7 @@ function LoadPlugin(file) {
     var k = document.getElementsByTagName("script")[0];
     k.parentNode.insertBefore(script, k);
 }
+*/
 
 class LogSource {
 
@@ -109,24 +128,6 @@ class LogSource {
     write(message) {
         WriteLog(`[${this.logID}] ${message}`);
     }
-}
-
-function RegisterPlugin(plugin) {
-
-    WriteLog(`PluginRegister: ${plugin.GUID}`);
-
-    if (!Plugins[plugin.GUID]) {
-        Plugins[plugin.GUID] = plugin;
-
-        //Hand off the API and plugin specific logger here
-        plugin.PluginRegistered(flowerAPI, new LogSource(plugin.GUID));
-
-        //Todo: Finalize plugins here once we have them all loaded or something IDK
-
-        return;
-    }
-
-    WriteLog(`Rejected duplicate plugin GUID`);
 }
 
 //#endregion flower-core
@@ -166,7 +167,7 @@ function onLoggerWindowLoaded(win) {
 
 /**
  * 
- * @param {string} objName 
+ * @param {object} obj 
  * @param {string} methodName 
  * @param {function} patch 
  * @param {boolean} isPrefix 
