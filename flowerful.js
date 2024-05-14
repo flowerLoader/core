@@ -2,9 +2,74 @@
  * Flowerful runtime detour library for Creator of Another World
  */
 
-/*
- * Todo: Add a call to plugin.PluginAwake after all plugins are resolved
+//#region typeDefs
+
+/**
+ * @typedef Plugin
+ * @property {string} GUID
+ * Fill this out and make it unique.
+ * Try to follow a reverse COM format or team.product schema here
+ * 
+ * @property {string} VERSION
+ * you can put whatever you want here but keep in mind other plugins
+ * may want to figure out if they know what features you offer based
+ * on your version so keep it simple to understand. SemVer x.x.x
+ * major.minor.release is easy to understand and parse
+ * 
+ * @property {string} NAME
+ * This can be whatever you want.
+ * 
+ * @property {boolean} ENABLED
+ * Flower will respect this value and refuse to load plugins that are disabled
+ * 
+ * @property {FlowerAPI} flower
+ * Flower will pass this to your plugin in the PluginRegistered function
+ * 
+ * @property {LogSource} logger
+ * Flower will pass this to your plugin in the PluginRegistered function
+ * 
+ * @property {PluginRegistered} PluginRegistered
+ * Flower will call this method after your plugin is registered.
+ * This is the earliest your plugin exists and because JS is async
+ * there is no way to access other plugins metadata/etc here.
+ * Flower and the logger are loaded. Other plugins may still be loading
+ * so do not perform anything but initilization here.
+ * 
+ * @property {PluginAwake} PluginAwake
+ * Flower will call this as a post-load event when it has finished loading
+ * or disposing of all plugins. All plugin states are ready here and you
+ * can depend on all other plugins being fully loaded at this point
+ * 
+ * @callback PluginRegistered
+ * @param {FlowerAPI} flower the flower API container
+ * @param {LogSource} logger your own logger
+ * @returns {void}
+ * 
+ * @callback PluginAwake
+ * @returns {void}
  */
+
+/**
+ * @typedef FlowerAPI
+ * @property {RegisterPatch} RegisterPatch
+ * Registers a detour to run on an object when a specific
+ * method is called.
+ * 
+ * @property {GetGameMain} GetGameMain
+ * Returns the main game object
+ * 
+ * @callback RegisterPatch
+ * @param {object} obj
+ * @param {string} methodName the name of the method to detour
+ * @param {Function} patch this function will be run when the detour is called
+ * @param {boolean} isPrefix
+ * @returns {boolean}
+ * 
+ * @callback GetGameMain
+ * @returns {object} tGameMain
+ */
+
+//#endregion typeDefs
 
 //#region flower_ctor
 
@@ -15,6 +80,7 @@ const flower = {
 };
 
 //This is what is sent to plugins when registering
+/** @type FlowerAPI */
 const flowerAPI =
 {
     RegisterPatch: RegisterPatch,
@@ -44,6 +110,7 @@ function GetGameMain() {
 
 async function LoadAllPlugins() {
     const fs = require('fs');
+    // eslint-disable-next-line no-undef
     const plugin_dir = nw.global.__dirname + "/gamedata/game/js/game/flower-plugins/";
 
     var files = fs.readdirSync(plugin_dir, {})
@@ -59,6 +126,11 @@ async function LoadAllPlugins() {
     for (var guid in Plugins) {
         Plugins[guid].PluginAwake();
     }
+
+    //Apply patches
+    for (var patch of patches) {
+        Apply(patch)
+    }
 }
 
 async function LoadPlugin(file) {
@@ -67,12 +139,22 @@ async function LoadPlugin(file) {
 
     try {
 
-        const plugin = (await import(filePath)).default;
+        /**
+         * @type {Plugin}
+         */
+        const plugin = (await import(filePath)).Plugin;
+        plugin.PluginRegistered()
 
         if (!Plugins[plugin.GUID]) {
             //Squawk
             WriteLog(`Registering ${plugin.GUID}`);
-            WriteLog(`String: ${JSON.stringify(plugin)}`);
+
+            //Check plugin is enabled
+            if (!plugin.ENABLED) {
+                WriteLog("Skipping, plugin is disabled");
+                return;
+            }
+
             //Store the plugin for later
             Plugins[plugin.GUID] = plugin;
 
@@ -80,7 +162,7 @@ async function LoadPlugin(file) {
             plugin.PluginRegistered(flowerAPI, new LogSource(plugin.GUID));
         }
         else {
-            throw new error("Duplicate plugin loaded");
+            throw new Error("Duplicate plugin loaded");
         }
 
     }
@@ -91,32 +173,8 @@ async function LoadPlugin(file) {
 
 }
 
-/*
-function LoadPlugin_Old(file) {
-    //load from the basedir of the DOM not the app
-    const filePath = `./js/game/flower-plugins/${file}`;
 
-    var script = document.createElement("script");
-    script.type = "text/javascript";
-    script.onload = function () {
-        //Plugin is loaded here
-        WriteLog(`Loaded: ${filePath}`);
-        script.parentNode.removeChild(script);
-    };
-    script.onerror = function (p) {
-        //plugin has caused an error
-        WriteLog(`Error: ${filePath}`);
-        WriteLog(`Error code: ${p}`);
-        script.parentNode.removeChild(script);
-    };
-    script.src = filePath;
-
-    //Insert the completed script
-    var k = document.getElementsByTagName("script")[0];
-    k.parentNode.insertBefore(script, k);
-}
-*/
-
+/** @class LogSource */
 class LogSource {
 
     logID = "";
@@ -125,6 +183,7 @@ class LogSource {
         this.logID = myID;
     }
 
+    /** @param {string} message  */
     write(message) {
         WriteLog(`[${this.logID}] ${message}`);
     }
@@ -140,7 +199,9 @@ function WriteLog(message) {
 
 function SetupLogger() {
     //Logger window
+    // eslint-disable-next-line no-undef
     const url = "file:///" + nw.global.__dirname + "/gamedata/game/logger.html";
+    // eslint-disable-next-line no-undef
     nw.Window.open(url, {
         /*frame: debbug,*/
         width: 600,
@@ -165,103 +226,83 @@ function onLoggerWindowLoaded(win) {
 
 //#region flower-patcher
 
-/**
- * 
- * @param {object} obj 
- * @param {string} methodName 
- * @param {function} patch 
- * @param {boolean} isPrefix 
- * @returns boolean
- */
-function RegisterPatch(obj, methodName, patch, isPrefix) {
+const patches = [];
 
-    WriteLog(`Running RegisterPatch ${obj}.${methodName}`);
-
-    if (!obj[methodName])
-        return false;
-
-    WriteLog(`Patching proceeds on ${obj}`);
-
-    //Check if the object has flower meta already
-    if (!obj._flowerMeta) {
-        obj._flowerMeta = {};
-        obj._flowerMeta.origMethods = {};
-        obj._flowerMeta.prefixMethods = {};
-        obj._flowerMeta.postfixMethods = {};
+function FindPatch(obj, method) {
+    if (!obj[method]) {
+        console.error(`Method ${method} not found on ${obj}`);
+        return;
     }
 
-    //backup the existing method to origs but only if it doesn't real already
-    if (!obj._flowerMeta.origMethods[methodName]) {
-        obj._flowerMeta.origMethods[methodName] = obj[methodName];
-        WriteLog(`Backing up orig`);
-    }
-
-    //write out the detour
-    obj[methodName] = function (...args) {
-
-        //debug
-        WriteLog(`Running detour for ${methodName} with ${args.length} args`);
-
-        //PreFixes
-        /*
-        if (prefixMethods[objName][methodName].length > 0) {
-            for (patch of prefixMethods[objName][methodName]) {
-                this._patchTemp = patch;
-                this._patchTemp(...args);
-            }
-        }*/
-
-        //run orig
-        //yes this is required or it breaks
-        //god I hate JavaScript
-        var temp = this[methodName];
-        this[methodName] = this._flowerMeta.origMethods[methodName];
-        this[methodName](...args);
-        this[methodName] = temp;
-
-        WriteLog("In after orig");
-
-        //Postfixes
-
-        var postfixes = this._flowerMeta.postfixMethods[methodName];
-
-        WriteLog(`Postfixes ${postfixes.length}`);
-
-        if (postfixes.length > 0) {
-            for (let i = 0; i < postfixes.length; i++) {
-                postfixes[i](...args);
-            }
+    for (const patch of patches) {
+        if (patch.obj === obj && patch.methodName === method) {
+            return patch;
         }
     }
 
-    //write the patch to the correct section
-    if (isPrefix) {
-        //create the method prefix list if it doesn't exist
-        if (!obj._flowerMeta.prefixMethods[methodName])
-            obj._flowerMeta.prefixMethods[methodName] = [];
-
-        //Add the prefix to the list
-        obj._flowerMeta.prefixMethods[methodName].push(patch);
-        WriteLog(`Prefix registered`);
-        return true;
+    const patch = {
+        obj: obj,
+        methodName: method,
+        prefixes: [],
+        postfixes: []
     }
 
-    //create the method prefix list if it doesn't exist
-    if (!obj._flowerMeta.postfixMethods[methodName])
-        obj._flowerMeta.postfixMethods[methodName] = [];
-
-    //Add the postfix to the list
-    obj._flowerMeta.postfixMethods[methodName].push(patch);
-    WriteLog(`Postfix registered`);
-    return true;
+    patches.push(patch);
+    return patch;
 }
 
+function Apply(patch) {
+    const orig = patch.obj[patch.methodName];
+
+    const wrapper = function (...args) {
+        WriteLog(`Running detour for ${patch.methodName}`);
+        // <-- this = obj
+
+        WriteLog(`Prefixes ${patch.prefixes.length}`);
+        //patch.prefixes.forEach(prefix => prefix.call(patch.obj, ...args));
+        //Allow ending the detour early
+        for (patch of patch.prefixes) {
+            if (false === patch.call(patch.obj, ...args)) {
+                WriteLog("Ending detour");
+                return;
+            }
+        }
+
+        try {
+            orig.call(patch.obj, ...args);
+        }
+        catch (e) {
+            WriteLog(`Error running orig: ${e}`)
+            return;
+        }
+
+        WriteLog(`Postfixes ${patch.postfixes.length}`);
+        patch.postfixes.forEach(postfix => postfix.call(patch.obj, ...args));
+    }
+
+    patch.obj[patch.methodName] = wrapper.bind(patch.obj);
+}
+
+function RegisterPatch(obj, methodName, patch, isPrefix) {
+
+    WriteLog(`Running RegisterPatch for ${methodName}`);
+
+    const accum = FindPatch(obj, methodName);
+    if (!accum) return false;
+
+    if (isPrefix) {
+        accum.prefixes.push(patch);
+    }
+    else {
+        accum.postfixes.push(patch);
+    }
+
+    return true;
+}
 //#endregion flower-patcher
 
 //Internal Context
 document._flowerInt = { Init }
-//Patch Context
-document.flower = { RegisterPlugin }
 
 //global.flower = { GameExists }
 //nw.flower = { GameExists }
