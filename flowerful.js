@@ -143,7 +143,6 @@ async function LoadPlugin(file) {
          * @type {Plugin}
          */
         const plugin = (await import(filePath)).Plugin;
-        plugin.PluginRegistered()
 
         if (!Plugins[plugin.GUID]) {
             //Squawk
