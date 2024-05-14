@@ -12,5 +12,5 @@ export type FlowerAPI = {
   RegisterPatch: (obj: Patchable, methodName: string, patch: PatchFn, isPrefix: boolean) => boolean
 
   // Returns the main game object
-  GetGameMain: () => object
+  GetGameMain: () => any
 }

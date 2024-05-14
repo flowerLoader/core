@@ -1,4 +1,5 @@
 import { FlowerAPI } from "./FlowerAPI"
+import { LogSource } from "./logSource"
 
 export type FlowerPlugin = {
   /**
