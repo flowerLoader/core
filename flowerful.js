@@ -114,14 +114,14 @@ async function LoadAllPlugins() {
     const plugin_dir = nw.global.__dirname + "/gamedata/game/js/game/flower-plugins/";
 
     var files = fs.readdirSync(plugin_dir, {})
-    WriteLog(`Loading ${files.length} plugins`);
+    WriteLog("Flower", `Loading ${files.length} plugins`);
 
     for (var file of files) {
-        WriteLog(`File: ${file}`);
+        WriteLog("Flower", `File: ${file}`);
         await LoadPlugin(file);
     }
 
-    WriteLog(`Running awakes for plugins`);
+    WriteLog("Flower", `Running awakes for plugins`);
 
     for (var guid in Plugins) {
         Plugins[guid].PluginAwake();
@@ -135,7 +135,7 @@ async function LoadAllPlugins() {
 
 async function LoadPlugin(file) {
     const filePath = `./flower-plugins/${file}`
-    WriteLog(`Importing ${filePath}`);
+    WriteLog("Flower", `Importing ${filePath}`);
 
     try {
 
@@ -146,11 +146,11 @@ async function LoadPlugin(file) {
 
         if (!Plugins[plugin.GUID]) {
             //Squawk
-            WriteLog(`Registering ${plugin.GUID}`);
+            WriteLog("Flower", `Registering ${plugin.GUID}`);
 
             //Check plugin is enabled
             if (!plugin.ENABLED) {
-                WriteLog("Skipping, plugin is disabled");
+                WriteLog("Flower", "Skipping, plugin is disabled");
                 return;
             }
 
@@ -166,7 +166,7 @@ async function LoadPlugin(file) {
 
     }
     catch (e) {
-        WriteLog(`Error loading: ${e.message}`);
+        WriteLog("Flower", `Error loading: ${e.message}`);
         return;
     }
 
@@ -184,7 +184,7 @@ class LogSource {
 
     /** @param {string} message  */
     write(message) {
-        WriteLog(`[${this.logID}] ${message}`);
+        WriteLog(this.logID, message);
     }
 }
 
@@ -192,8 +192,14 @@ class LogSource {
 
 //#region flower-logger
 
-function WriteLog(message) {
-    flower.logger.window.document.body.innerHTML += `<div> ${message} </div>`;
+function WriteLog(title, message) {
+
+    flower.logger.window.document.body.innerHTML +=
+        `<div class="log-entry">
+	        <div class="head">${title}</div>
+	        <div class="body">${message}</div>
+        </div>`;
+
 }
 
 function SetupLogger() {
@@ -212,10 +218,7 @@ function SetupLogger() {
 
 function onLoggerWindowLoaded(win) {
     flower.logger = win;
-    win.window.document.body.innerHTML += "<h2>Executable Started</h2>";
-    win.on('data', function (data) {
-        win.window.document.body.innerHTML += "<h2>" + data.message + "</h2>";
-    });
+    //win.window.document.body.innerHTML += "<h2>Executable Started</h2>";
 
     //Start patchloading here
     LoadAllPlugins();
@@ -254,15 +257,15 @@ function Apply(patch) {
     const orig = patch.obj[patch.methodName];
 
     const wrapper = function (...args) {
-        WriteLog(`Running detour for ${patch.methodName}`);
+        WriteLog("Flower", `Running detour for ${patch.methodName}`);
         // <-- this = obj
 
-        WriteLog(`Prefixes ${patch.prefixes.length}`);
+        WriteLog("Flower", `Prefixes ${patch.prefixes.length}`);
         //patch.prefixes.forEach(prefix => prefix.call(patch.obj, ...args));
         //Allow ending the detour early
         for (patch of patch.prefixes) {
             if (false === patch.call(patch.obj, ...args)) {
-                WriteLog("Ending detour");
+                WriteLog("Flower", "Ending detour");
                 return;
             }
         }
@@ -271,11 +274,11 @@ function Apply(patch) {
             orig.call(patch.obj, ...args);
         }
         catch (e) {
-            WriteLog(`Error running orig: ${e}`)
+            WriteLog("Flower", `Error running orig: ${e}`)
             return;
         }
 
-        WriteLog(`Postfixes ${patch.postfixes.length}`);
+        WriteLog("Flower", `Postfixes ${patch.postfixes.length}`);
         patch.postfixes.forEach(postfix => postfix.call(patch.obj, ...args));
     }
 
@@ -284,7 +287,7 @@ function Apply(patch) {
 
 function RegisterPatch(obj, methodName, patch, isPrefix) {
 
-    WriteLog(`Running RegisterPatch for ${methodName}`);
+    WriteLog("Flower", `Running RegisterPatch for ${methodName}`);
 
     const accum = FindPatch(obj, methodName);
     if (!accum) return false;

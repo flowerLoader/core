@@ -1,0 +1,36 @@
+#title {
+    border-top: 4px #7a532b solid;
+    border-bottom: 4px #7a532b solid;
+    font-variant: small-caps;
+    font-size: 2rem;
+    text-align: center;
+    padding-bottom: 4px;
+    margin: 0px 8px 0px 8px;
+    color: #3d3d3d;
+    background-color: #fdfaea;
+}
+
+body {
+    background-color: #1f5b92;
+    color: black;
+    padding: 2px;
+}
+
+div.log-entry {
+    background-color: #f1d283;
+    margin: 8px;
+    padding: 2px;
+    box-shadow: 4px 6px #7a532b;
+}
+
+.head {
+    font-size: 1.4rem;
+    font-weight: bold;
+    border-bottom: 2px #836842 dashed;
+    padding: 4px;
+}
+
+.body {
+    font-size: 1.2rem;
+    padding: 4px 4px 4px 8px;
+}
