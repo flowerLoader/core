@@ -9,6 +9,7 @@ import type { FlowerPatch, Patchable, PatchFn } from "./api/FlowerPatch"
 import type { FlowerPlugin } from "./api/FlowerPlugin"
 import { LogSource } from "./logSource"
 
+/* eslint-disable-next-line @typescript-eslint/no-explicit-any */
 declare const nw: any;
 
 //#endregion typeDefs
@@ -18,6 +19,7 @@ declare const nw: any;
 //To communicate with the logger window
 //Internal to flower only
 const flower = {
+    /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
     logger: {} as any,
 };
 
@@ -28,15 +30,16 @@ const flowerAPI: FlowerAPI =
     GetGameMain: GetGameMain,
 };
 
-var GameMain = {};
+let GameMain = {};
 
 //All plugins live here
-var Plugins: { [key: string]: FlowerPlugin } = {};
+const Plugins: { [key: string]: FlowerPlugin } = {};
 
 //#endregion flower_ctor
 
 //#region flower-core
 
+/* eslint-disable-next-line @typescript-eslint/no-explicit-any */
 function Init(main: any)
 {
     GameMain = main;
@@ -53,14 +56,14 @@ function GetGameMain()
 
 async function LoadAllPlugins()
 {
+    /* eslint-disable-next-line @typescript-eslint/no-var-requires */
     const fs = require('fs');
-    // eslint-disable-next-line no-undef
     const plugin_dir = nw.global.__dirname + "/gamedata/game/js/game/flower-plugins/";
 
-    var files = fs.readdirSync(plugin_dir, {})
+    const files = fs.readdirSync(plugin_dir, {})
     WriteLog("Flower", `Loading ${files.length} plugins`);
 
-    for (var file of files)
+    for (const file of files)
     {
         WriteLog("Flower", `File: ${file}`);
         await LoadPlugin(file);
@@ -68,13 +71,13 @@ async function LoadAllPlugins()
 
     WriteLog("Flower", `Running awakes for plugins`);
 
-    for (var guid in Plugins)
+    for (const guid in Plugins)
     {
         Plugins[guid].PluginAwake();
     }
 
     //Apply patches
-    for (var patch of patches)
+    for (const patch of patches)
     {
         Apply(patch)
     }
@@ -117,6 +120,7 @@ async function LoadPlugin(file: string)
         }
 
     }
+    /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
     catch (e: any)
     {
         WriteLog("Flower", `Error loading: ${e.message}`);
@@ -143,19 +147,19 @@ export function WriteLog(title: string, message: string)
 function SetupLogger()
 {
     //Logger window
-    // eslint-disable-next-line no-undef
     const url = "file:///" + nw.global.__dirname + "/gamedata/game/logger.html";
-    // eslint-disable-next-line no-undef
     nw.Window.open(url, {
         /*frame: debbug,*/
         width: 600,
         height: 800,
+        /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
     }, function (win: any)
     {
         win.once('loaded', function () { onLoggerWindowLoaded(win) });
     });
 }
 
+/* eslint-disable-next-line @typescript-eslint/no-explicit-any */
 function onLoggerWindowLoaded(win: any)
 {
     flower.logger = win;
@@ -200,6 +204,7 @@ function FindPatch(obj: Patchable, method: string)
 
 function Apply(patch: FlowerPatch)
 {
+    /* eslint-disable-next-line @typescript-eslint/ban-types */
     const orig = patch.obj[patch.methodName] as Function;
 
     const wrapper: PatchFn = function (...args)
