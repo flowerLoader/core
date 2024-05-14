@@ -4,70 +4,12 @@
 
 //#region typeDefs
 
-/**
- * @typedef Plugin
- * @property {string} GUID
- * Fill this out and make it unique.
- * Try to follow a reverse COM format or team.product schema here
- * 
- * @property {string} VERSION
- * you can put whatever you want here but keep in mind other plugins
- * may want to figure out if they know what features you offer based
- * on your version so keep it simple to understand. SemVer x.x.x
- * major.minor.release is easy to understand and parse
- * 
- * @property {string} NAME
- * This can be whatever you want.
- * 
- * @property {boolean} ENABLED
- * Flower will respect this value and refuse to load plugins that are disabled
- * 
- * @property {FlowerAPI} flower
- * Flower will pass this to your plugin in the PluginRegistered function
- * 
- * @property {LogSource} logger
- * Flower will pass this to your plugin in the PluginRegistered function
- * 
- * @property {PluginRegistered} PluginRegistered
- * Flower will call this method after your plugin is registered.
- * This is the earliest your plugin exists and because JS is async
- * there is no way to access other plugins metadata/etc here.
- * Flower and the logger are loaded. Other plugins may still be loading
- * so do not perform anything but initilization here.
- * 
- * @property {PluginAwake} PluginAwake
- * Flower will call this as a post-load event when it has finished loading
- * or disposing of all plugins. All plugin states are ready here and you
- * can depend on all other plugins being fully loaded at this point
- * 
- * @callback PluginRegistered
- * @param {FlowerAPI} flower the flower API container
- * @param {LogSource} logger your own logger
- * @returns {void}
- * 
- * @callback PluginAwake
- * @returns {void}
- */
+import type { FlowerAPI } from "./api/FlowerAPI";
+import type { FlowerPatch, Patchable, PatchFn } from "./api/FlowerPatch"
+import type { FlowerPlugin } from "./api/FlowerPlugin"
+import { LogSource } from "./logSource"
 
-/**
- * @typedef FlowerAPI
- * @property {RegisterPatch} RegisterPatch
- * Registers a detour to run on an object when a specific
- * method is called.
- * 
- * @property {GetGameMain} GetGameMain
- * Returns the main game object
- * 
- * @callback RegisterPatch
- * @param {object} obj
- * @param {string} methodName the name of the method to detour
- * @param {Function} patch this function will be run when the detour is called
- * @param {boolean} isPrefix
- * @returns {boolean}
- * 
- * @callback GetGameMain
- * @returns {object} tGameMain
- */
+declare const nw: any;
 
 //#endregion typeDefs
 
@@ -76,12 +18,11 @@
 //To communicate with the logger window
 //Internal to flower only
 const flower = {
-    logger: {},
+    logger: {} as any,
 };
 
 //This is what is sent to plugins when registering
-/** @type FlowerAPI */
-const flowerAPI =
+const flowerAPI: FlowerAPI =
 {
     RegisterPatch: RegisterPatch,
     GetGameMain: GetGameMain,
@@ -90,13 +31,14 @@ const flowerAPI =
 var GameMain = {};
 
 //All plugins live here
-var Plugins = {};
+var Plugins: { [key: string]: FlowerPlugin } = {};
 
 //#endregion flower_ctor
 
 //#region flower-core
 
-function Init(main) {
+function Init(main: any)
+{
     GameMain = main;
 
     main.firstLogData.events.addLog("Flower loaded");
@@ -104,11 +46,13 @@ function Init(main) {
     SetupLogger();
 }
 
-function GetGameMain() {
+function GetGameMain()
+{
     return GameMain;
 }
 
-async function LoadAllPlugins() {
+async function LoadAllPlugins()
+{
     const fs = require('fs');
     // eslint-disable-next-line no-undef
     const plugin_dir = nw.global.__dirname + "/gamedata/game/js/game/flower-plugins/";
@@ -116,40 +60,47 @@ async function LoadAllPlugins() {
     var files = fs.readdirSync(plugin_dir, {})
     WriteLog("Flower", `Loading ${files.length} plugins`);
 
-    for (var file of files) {
+    for (var file of files)
+    {
         WriteLog("Flower", `File: ${file}`);
         await LoadPlugin(file);
     }
 
     WriteLog("Flower", `Running awakes for plugins`);
 
-    for (var guid in Plugins) {
+    for (var guid in Plugins)
+    {
         Plugins[guid].PluginAwake();
     }
 
     //Apply patches
-    for (var patch of patches) {
+    for (var patch of patches)
+    {
         Apply(patch)
     }
 }
 
-async function LoadPlugin(file) {
+async function LoadPlugin(file: string)
+{
     const filePath = `./flower-plugins/${file}`
     WriteLog("Flower", `Importing ${filePath}`);
 
-    try {
+    try
+    {
 
         /**
          * @type {Plugin}
          */
         const plugin = (await import(filePath)).Plugin;
 
-        if (!Plugins[plugin.GUID]) {
+        if (!Plugins[plugin.GUID])
+        {
             //Squawk
             WriteLog("Flower", `Registering ${plugin.GUID}`);
 
             //Check plugin is enabled
-            if (!plugin.ENABLED) {
+            if (!plugin.ENABLED)
+            {
                 WriteLog("Flower", "Skipping, plugin is disabled");
                 return;
             }
@@ -160,39 +111,26 @@ async function LoadPlugin(file) {
             //Tell the plugin it is being registered and pass it the API/Logger
             plugin.PluginRegistered(flowerAPI, new LogSource(plugin.GUID));
         }
-        else {
+        else
+        {
             throw new Error("Duplicate plugin loaded");
         }
 
     }
-    catch (e) {
+    catch (e: any)
+    {
         WriteLog("Flower", `Error loading: ${e.message}`);
         return;
     }
 
 }
 
-
-/** @class LogSource */
-class LogSource {
-
-    logID = "";
-
-    constructor(myID) {
-        this.logID = myID;
-    }
-
-    /** @param {string} message  */
-    write(message) {
-        WriteLog(this.logID, message);
-    }
-}
-
 //#endregion flower-core
 
 //#region flower-logger
 
-function WriteLog(title, message) {
+export function WriteLog(title: string, message: string)
+{
 
     flower.logger.window.document.body.innerHTML +=
         `<div class="log-entry">
@@ -202,7 +140,8 @@ function WriteLog(title, message) {
 
 }
 
-function SetupLogger() {
+function SetupLogger()
+{
     //Logger window
     // eslint-disable-next-line no-undef
     const url = "file:///" + nw.global.__dirname + "/gamedata/game/logger.html";
@@ -211,12 +150,14 @@ function SetupLogger() {
         /*frame: debbug,*/
         width: 600,
         height: 800,
-    }, function (win) {
+    }, function (win: any)
+    {
         win.once('loaded', function () { onLoggerWindowLoaded(win) });
     });
 }
 
-function onLoggerWindowLoaded(win) {
+function onLoggerWindowLoaded(win: any)
+{
     flower.logger = win;
     //win.window.document.body.innerHTML += "<h2>Executable Started</h2>";
 
@@ -228,21 +169,25 @@ function onLoggerWindowLoaded(win) {
 
 //#region flower-patcher
 
-const patches = [];
+const patches: FlowerPatch[] = [];
 
-function FindPatch(obj, method) {
-    if (!obj[method]) {
+function FindPatch(obj: Patchable, method: string)
+{
+    if (!obj[method])
+    {
         console.error(`Method ${method} not found on ${obj}`);
         return;
     }
 
-    for (const patch of patches) {
-        if (patch.obj === obj && patch.methodName === method) {
+    for (const patch of patches)
+    {
+        if (patch.obj === obj && patch.methodName === method)
+        {
             return patch;
         }
     }
 
-    const patch = {
+    const patch: FlowerPatch = {
         obj: obj,
         methodName: method,
         prefixes: [],
@@ -253,27 +198,33 @@ function FindPatch(obj, method) {
     return patch;
 }
 
-function Apply(patch) {
-    const orig = patch.obj[patch.methodName];
+function Apply(patch: FlowerPatch)
+{
+    const orig = patch.obj[patch.methodName] as Function;
 
-    const wrapper = function (...args) {
+    const wrapper: PatchFn = function (...args)
+    {
         WriteLog("Flower", `Running detour for ${patch.methodName}`);
         // <-- this = obj
 
         WriteLog("Flower", `Prefixes ${patch.prefixes.length}`);
         //patch.prefixes.forEach(prefix => prefix.call(patch.obj, ...args));
         //Allow ending the detour early
-        for (patch of patch.prefixes) {
-            if (false === patch.call(patch.obj, ...args)) {
+        for (const prefix of patch.prefixes)
+        {
+            if (false === prefix.call(patch.obj, ...args))
+            {
                 WriteLog("Flower", "Ending detour");
                 return;
             }
         }
 
-        try {
+        try
+        {
             orig.call(patch.obj, ...args);
         }
-        catch (e) {
+        catch (e)
+        {
             WriteLog("Flower", `Error running orig: ${e}`)
             return;
         }
@@ -285,17 +236,20 @@ function Apply(patch) {
     patch.obj[patch.methodName] = wrapper.bind(patch.obj);
 }
 
-function RegisterPatch(obj, methodName, patch, isPrefix) {
+function RegisterPatch(obj: Patchable, methodName: string, patch: PatchFn, isPrefix: boolean)
+{
 
     WriteLog("Flower", `Running RegisterPatch for ${methodName}`);
 
     const accum = FindPatch(obj, methodName);
     if (!accum) return false;
 
-    if (isPrefix) {
+    if (isPrefix)
+    {
         accum.prefixes.push(patch);
     }
-    else {
+    else
+    {
         accum.postfixes.push(patch);
     }
 
