@@ -2,8 +2,13 @@
  * A simple patch to expose the game's limits and allow tweaking them
  */
 
-/** @type {import("../flowerful").Plugin} */
-export const Plugin =
+import { FlowerPlugin } from "../api/FlowerPlugin";
+import { FlowerAPI } from "../api/FlowerAPI";
+import { LogSource } from "../api/logSource";
+
+export const Plugin: FlowerPlugin & {
+    CONFIG: { MaxPartySize: number }
+} =
 {
 
     GUID: "flowerteam.limitbreaker",
@@ -14,8 +19,8 @@ export const Plugin =
 
     ENABLED: true,
 
-    flower: {},
-    logger: {},
+    flower: {} as FlowerAPI,
+    logger: {} as LogSource,
 
     CONFIG:
     {
@@ -23,13 +28,15 @@ export const Plugin =
         MaxPartySize: 10,
     },
 
-    PluginRegistered: function (flower, logger) {
+    PluginRegistered: function (flower, logger)
+    {
         this.flower = flower;
         this.logger = logger;
         this.logger.write("Loaded");
     },
 
-    PluginAwake: function () {
+    PluginAwake: function ()
+    {
         this.logger.write("Setting limits");
 
         //Change some values
