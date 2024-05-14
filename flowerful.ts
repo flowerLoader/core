@@ -2,9 +2,9 @@
  * Flowerful runtime detour library for Creator of Another World
  */
 
-import type { FlowerAPI } from "./api/FlowerAPI";
-import type { FlowerPlugin } from "./api/FlowerPlugin"
-import { LogSource } from "./api/logSource";
+import { FlowerAPI } from "@flowerloader/api/FlowerAPI";
+import { FlowerPlugin } from "@flowerloader/api/FlowerPlugin"
+import { LogSource } from "@flowerloader/api/logSource";
 import { ApplyAllPatches, RegisterPatch } from "./flowerful.patches";
 
 /* eslint-disable-next-line @typescript-eslint/no-explicit-any */

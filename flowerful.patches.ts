@@ -1,5 +1,5 @@
+import { FlowerPatch, Patchable, PatchFn } from "@flowerloader/api/FlowerPatch";
 import { WriteLog } from "./flowerful";
-import { FlowerPatch, Patchable, PatchFn } from "./api/FlowerPatch";
 
 const patches: FlowerPatch[] = [];
 
