@@ -26,7 +26,8 @@ const flowerAPI: FlowerAPI =
     GetGameMain: GetGameMain,
 };
 
-let GameMain = {};
+//@ts-ignore
+let GameMain = tWgm;
 
 //All plugins live here
 const Plugins: { [key: string]: FlowerPlugin } = {};
@@ -34,16 +35,6 @@ const Plugins: { [key: string]: FlowerPlugin } = {};
 //#endregion flower_ctor
 
 //#region flower-core
-
-/* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-function Init(main: any)
-{
-    GameMain = main;
-
-    main.firstLogData.events.addLog("Flower loaded");
-
-    SetupLogger();
-}
 
 function GetGameMain()
 {
@@ -171,12 +162,7 @@ function onLoggerWindowLoaded(win: any)
 
 //#endregion flower-logger
 
-//Internal Context
-document._flowerInt = { Init }
-
-//global.flower = { GameExists }
-//nw.flower = { GameExists }
-
-//Verified FAKE NEWS
-//window.flower = { GameExists }
-//globalThis.flower = { GameExists }
+window.onload = function ()
+{
+    SetupLogger();
+};
