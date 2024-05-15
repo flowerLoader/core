@@ -2,8 +2,11 @@
 Flower plugin example/template
 */
 
-/** @type {import("../flowerful").Plugin} */
-export const Plugin =
+import { FlowerAPI } from "@flowerloader/api/FlowerAPI";
+import { FlowerPlugin } from "@flowerloader/api/FlowerPlugin";
+import { LogSource } from "@flowerloader/api/logSource";
+
+export const Plugin: FlowerPlugin =
 {
     GUID: "flowerteam.testpatch",
 
@@ -13,30 +16,33 @@ export const Plugin =
 
     ENABLED: false,
 
-    flower: {},
-    logger: {},
+    flower: {} as FlowerAPI,
+    logger: {} as LogSource,
 
-    PluginRegistered: function (flower, logger) {
+    PluginRegistered: function (flower, logger)
+    {
         this.flower = flower;
         this.logger = logger;
         this.logger.write("Loaded");
     },
 
-    PluginAwake: function () {
+    PluginAwake: function ()
+    {
         this.logger.write("Awake");
 
         //for the enclosed functions
         var logger = this.logger;
 
         // eslint-disable-next-line no-unused-vars
-        this.flower.RegisterPatch(this.flower.GetGameMain(), "startNewGame", function (a, b, c) {
+        this.flower.RegisterPatch(this.flower.GetGameMain(), "startNewGame", function (a, b, c)
+        {
             logger.write(`Postfix!`);
         }, false);
 
         // eslint-disable-next-line no-unused-vars
-        this.flower.RegisterPatch(this.flower.GetGameMain(), "startNewGame", function (a, b, c) {
+        this.flower.RegisterPatch(this.flower.GetGameMain(), "startNewGame", function (a, b, c)
+        {
             logger.write("Prefix!");
-            logger.write()
         }, true);
     },
 

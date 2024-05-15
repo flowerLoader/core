@@ -16,5 +16,8 @@
     "globals": "^15.2.0",
     "typescript": "^5.4.5",
     "typescript-eslint": "^7.9.0"
+  },
+  "dependencies": {
+    "@flowerloader/api": "^1.0.0"
   }
 }
