@@ -2,9 +2,9 @@
 Flower plugin example/template
 */
 
-import { FlowerAPI } from "../api/FlowerAPI";
-import { FlowerPlugin } from "../api/FlowerPlugin";
-import { LogSource } from "../api/logSource";
+import { FlowerAPI } from "@flowerloader/api/FlowerAPI";
+import { FlowerPlugin } from "@flowerloader/api/FlowerPlugin";
+import { LogSource } from "@flowerloader/api/logSource";
 
 export const Plugin: FlowerPlugin =
 {

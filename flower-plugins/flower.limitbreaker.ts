@@ -2,11 +2,12 @@
  * A simple patch to expose the game's limits and allow tweaking them
  */
 
-import { FlowerPlugin } from "../api/FlowerPlugin";
-import { FlowerAPI } from "../api/FlowerAPI";
-import { LogSource } from "../api/logSource";
+import { FlowerAPI } from "@flowerloader/api/FlowerAPI";
+import { FlowerPlugin } from "@flowerloader/api/FlowerPlugin";
+import { LogSource } from "@flowerloader/api/logSource";
 
-export const Plugin: FlowerPlugin & {
+export const Plugin: FlowerPlugin &
+{
     CONFIG: { MaxPartySize: number }
 } =
 {
