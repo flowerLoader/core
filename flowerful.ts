@@ -2,13 +2,14 @@
  * Flowerful runtime detour library for Creator of Another World
  */
 
-import { FlowerAPI } from "@flowerloader/api/FlowerAPI";
-import { FlowerPlugin } from "@flowerloader/api/FlowerPlugin"
-import { LogSource } from "@flowerloader/api/logSource";
-import { ApplyAllPatches, RegisterPatch } from "./flowerful.patches";
+import { FlowerAPI, FlowerModule, IFlowerPlugin, isModule, LogSource } from "@flowerloader/api";
+import { RegisterPatch, ApplyAllPatches } from "./flowerful.patches";
 
 /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
 declare const nw: any;
+
+/* Set this to true to get ALL the spammy log messages */
+const debuglogging = false;
 
 //#region flower_ctor
 
@@ -29,7 +30,7 @@ const flowerAPI: FlowerAPI =
 let GameMain = {};
 
 //All plugins live here
-const Plugins: { [key: string]: FlowerPlugin } = {};
+const Plugins: { [key: string]: IFlowerPlugin } = {};
 
 //#endregion flower_ctor
 
@@ -57,19 +58,29 @@ async function LoadAllPlugins()
     const plugin_dir = nw.global.__dirname + "/gamedata/game/js/game/flower-plugins/";
 
     const files = fs.readdirSync(plugin_dir, {})
-    WriteLog("Flower", `Loading ${files.length} plugins`);
+    WriteDebug(`Loading ${files.length} plugins`);
 
     for (const file of files)
     {
-        WriteLog("Flower", `File: ${file}`);
+        WriteDebug(`Loading File: ${file}`);
         await LoadPlugin(file);
     }
 
-    WriteLog("Flower", `Running awakes for plugins`);
+    WriteDebug(`Running awakes for plugins`);
 
     for (const guid in Plugins)
     {
-        Plugins[guid].PluginAwake();
+        try
+        {
+            Plugins[guid].Awake();
+        } catch (e: any)
+        {
+            WriteLog("Flower", `Error loading ${guid}: ${e.message}`);
+            delete Plugins[guid];
+
+            //Strech goals: Delete patches from bad boys that fail on Awake()
+        }
+
     }
 
     ApplyAllPatches();
@@ -83,33 +94,40 @@ async function LoadPlugin(file: string)
     try
     {
 
-        /**
-         * @type {Plugin}
-         */
-        const plugin = (await import(filePath)).Plugin;
+        const maybePlugin = (await import(filePath));
 
-        if (!Plugins[plugin.GUID])
+        if (isModule(maybePlugin))
         {
-            //Squawk
-            WriteLog("Flower", `Registering ${plugin.GUID}`);
 
-            //Check plugin is enabled
-            if (!plugin.ENABLED)
+            const {
+                META: meta, default: pluginConstructor
+            } = maybePlugin;
+
+            if (!Plugins[meta.GUID])
             {
-                WriteLog("Flower", "Skipping, plugin is disabled");
-                return;
+                //Squawk
+                WriteDebug(`Registering ${meta.GUID}`);
+
+                //Check plugin is enabled
+                if (!meta.ENABLED)
+                {
+                    WriteDebug("Skipping, plugin is disabled");
+                    return;
+                }
+
+                //Where the magic happens
+                const plugin = new pluginConstructor(flowerAPI, new LogSource(meta.GUID, WriteLog));
+
+                Plugins[meta.GUID] = plugin;
+
             }
-
-            //Store the plugin for later
-            Plugins[plugin.GUID] = plugin;
-
-            //Tell the plugin it is being registered and pass it the API/Logger
-            plugin.PluginRegistered(flowerAPI, new LogSource(plugin.GUID, WriteLog));
+            else
+            {
+                throw new Error("Duplicate plugin loaded");
+            }
         }
         else
-        {
-            throw new Error("Duplicate plugin loaded");
-        }
+            throw new Error("Not a valid plugin")
 
     }
     /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
@@ -124,6 +142,14 @@ async function LoadPlugin(file: string)
 //#endregion flower-core
 
 //#region flower-logger
+
+export function WriteDebug(message: string)
+{
+    if (!debuglogging)
+        return;
+
+    WriteLog("Flower Debug", message);
+}
 
 export function WriteLog(title: string, message: string)
 {
