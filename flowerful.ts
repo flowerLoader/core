@@ -16,7 +16,7 @@ declare const nw: any;
 //Internal to flower only
 const flower = {
     /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-    logger: {} as any,
+    logger: {} as { window: Window },
 };
 
 //This is what is sent to plugins when registering
@@ -69,7 +69,16 @@ async function LoadAllPlugins()
 
     for (const guid in Plugins)
     {
-        Plugins[guid].PluginAwake();
+        try
+        {
+            Plugins[guid].PluginAwake();
+        } catch (e: any)
+        {
+            WriteLog("Flower", `Error loading ${guid}: ${e.message}`);
+            Plugins[guid].ENABLED = false;
+            //Strech goals: Delete patches from bad boys that fail on Awake()
+        }
+
     }
 
     ApplyAllPatches();
@@ -83,10 +92,7 @@ async function LoadPlugin(file: string)
     try
     {
 
-        /**
-         * @type {Plugin}
-         */
-        const plugin = (await import(filePath)).Plugin;
+        const plugin: FlowerPlugin = (await import(filePath)).Plugin;
 
         if (!Plugins[plugin.GUID])
         {
@@ -128,11 +134,13 @@ async function LoadPlugin(file: string)
 export function WriteLog(title: string, message: string)
 {
 
-    flower.logger.window.document.body.innerHTML +=
-        `<div class="log-entry">
-	        <div class="head">${title}</div>
-	        <div class="body">${message}</div>
-        </div>`;
+    const logBody = flower.logger.window.document.getElementById("log-body");
+    const el = flower.logger.window.document.createElement("div");
+    el.className = "log-entry"
+    el.innerHTML = `<div class="head">${title}</div>
+                        <div class="body">${message}</div>`;
+
+    logBody?.insertBefore(el, logBody.firstChild)
 
 }
 
