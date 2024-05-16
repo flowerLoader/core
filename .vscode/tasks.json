@@ -6,9 +6,9 @@
 		{
 			"label": "esbuild",
 			"type": "shell",
-			"command": "npx esbuild --bundle flowerful.ts --format=esm --outdir=build/ --platform=node; npx esbuild ./flower-plugins/*.ts --format=esm --outdir=./build/flower-plugins --platform=node",
+			"command": "npx esbuild --bundle flowerful.ts --format=esm --outdir=build/ --platform=node",
 			"windows": {
-				"command": ".\\scripts\\test.cmd"
+				"command": ""
 			},
 			"group": {
 				"kind": "build",

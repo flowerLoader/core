@@ -1,2 +1,0 @@
-This project and all files contained herein are licensed under the CC BY NC 4.0 license
-available in full at the following address: [license](https://www.creativecommons.org/licenses/by-nc/4.0/deed.en)

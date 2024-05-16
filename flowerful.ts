@@ -17,7 +17,7 @@ const debuglogging = false;
 //Internal to flower only
 const flower = {
     /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-    logger: {} as any,
+    logger: {} as { window: Window },
 };
 
 //This is what is sent to plugins when registering
@@ -27,7 +27,8 @@ const flowerAPI: FlowerAPI =
     GetGameMain: GetGameMain,
 };
 
-let GameMain = {};
+//@ts-ignore
+let GameMain = tWgm;
 
 //All plugins live here
 const Plugins: { [key: string]: IFlowerPlugin } = {};
@@ -35,16 +36,6 @@ const Plugins: { [key: string]: IFlowerPlugin } = {};
 //#endregion flower_ctor
 
 //#region flower-core
-
-/* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-function Init(main: any)
-{
-    GameMain = main;
-
-    main.firstLogData.events.addLog("Flower loaded");
-
-    SetupLogger();
-}
 
 function GetGameMain()
 {
@@ -77,7 +68,6 @@ async function LoadAllPlugins()
         {
             WriteLog("Flower", `Error loading ${guid}: ${e.message}`);
             delete Plugins[guid];
-
             //Strech goals: Delete patches from bad boys that fail on Awake()
         }
 
@@ -154,11 +144,13 @@ export function WriteDebug(message: string)
 export function WriteLog(title: string, message: string)
 {
 
-    flower.logger.window.document.body.innerHTML +=
-        `<div class="log-entry">
-	        <div class="head">${title}</div>
-	        <div class="body">${message}</div>
-        </div>`;
+    const logBody = flower.logger.window.document.getElementById("log-body");
+    const el = flower.logger.window.document.createElement("div");
+    el.className = "log-entry"
+    el.innerHTML = `<div class="head">${title}</div>
+                        <div class="body">${message}</div>`;
+
+    logBody?.insertBefore(el, logBody.firstChild)
 
 }
 
@@ -189,12 +181,7 @@ function onLoggerWindowLoaded(win: any)
 
 //#endregion flower-logger
 
-//Internal Context
-document._flowerInt = { Init }
-
-//global.flower = { GameExists }
-//nw.flower = { GameExists }
-
-//Verified FAKE NEWS
-//window.flower = { GameExists }
-//globalThis.flower = { GameExists }
+window.onload = function ()
+{
+    SetupLogger();
+};
