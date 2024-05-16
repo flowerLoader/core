@@ -15,9 +15,8 @@
 [![Steam](https://img.shields.io/badge/Steam-Creator_Of_Another_World-1b2838?style=for-the-badge&logo=steam)](https://store.steampowered.com/app/2761610/Creator_of_Another_World/)  
 by [kuetaro (くえたろう)](https://store.steampowered.com/curator/44822906)
 
-## Table of Contents
+<h2> Table of Contents </h2>
 
-- [Table of Contents](#table-of-contents)
 - [Installing FlowerLoader](#installing-flowerloader)
   - [From a Released version](#from-a-released-version)
   - [From Source](#from-source)
