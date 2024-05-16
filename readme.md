@@ -43,7 +43,7 @@ by [kuetaro (くえたろう)](https://store.steampowered.com/curator/44822906)
 
 To find Your base install directory right click on steam and select Manage>Browse Local Files then navigate to:
 
-`TODO: Ask Damon what this is`
+`/game`
 
 You should see the files `index.html` and `empty.html`. This folder is your base install directory. All instructions will be given with this folder as the root in mind.
 </details>
