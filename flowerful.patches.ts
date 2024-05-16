@@ -1,5 +1,5 @@
 import { FlowerPatch, Patchable, PatchFn } from "@flowerloader/api/FlowerPatch";
-import { WriteLog } from "./flowerful";
+import { WriteLog, WriteDebug } from "./flowerful";
 
 const patches: FlowerPatch[] = [];
 
@@ -46,17 +46,17 @@ function Apply(patch: FlowerPatch)
 
     const wrapper: PatchFn = function (...args)
     {
-        WriteLog("Flower", `Running detour for ${patch.methodName}`);
+        WriteDebug(`Running detour for ${patch.methodName}`);
         // <-- this = obj
 
-        WriteLog("Flower", `Prefixes ${patch.prefixes.length}`);
+        WriteDebug(`Prefixes ${patch.prefixes.length}`);
         //patch.prefixes.forEach(prefix => prefix.call(patch.obj, ...args));
         //Allow ending the detour early
         for (const prefix of patch.prefixes)
         {
             if (false === prefix.call(patch.obj, ...args))
             {
-                WriteLog("Flower", "Ending detour");
+                WriteDebug("Ending detour");
                 return;
             }
         }
@@ -71,7 +71,7 @@ function Apply(patch: FlowerPatch)
             return;
         }
 
-        WriteLog("Flower", `Postfixes ${patch.postfixes.length}`);
+        WriteDebug(`Postfixes ${patch.postfixes.length}`);
         patch.postfixes.forEach(postfix => postfix.call(patch.obj, ...args));
     }
 
@@ -81,7 +81,7 @@ function Apply(patch: FlowerPatch)
 export function RegisterPatch(obj: Patchable, methodName: string, patch: PatchFn, isPrefix: boolean)
 {
 
-    WriteLog("Flower", `Running RegisterPatch for ${methodName}`);
+    WriteDebug(`Running RegisterPatch for ${methodName}`);
 
     const accum = FindPatch(obj, methodName);
     if (!accum) return false;
