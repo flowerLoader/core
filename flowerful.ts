@@ -9,7 +9,13 @@ import { RegisterPatch, ApplyAllPatches } from "./flowerful.patches";
 declare const nw: any;
 
 /* Set this to true to get ALL the spammy log messages */
-const debuglogging = false;
+const debuglogging = true;
+
+/**
+ * This is how long flower waits in ms before setting up at the start
+ * This will need to be configurable on a per-game basis
+ */
+const timeout = 75;
 
 //#region flower_ctor
 
@@ -163,7 +169,10 @@ function SetupLogger()
         /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
     }, function (win: any)
     {
-        win.once('loaded', function () { onLoggerWindowLoaded(win) });
+        win.once('loaded', function ()
+        {
+            onLoggerWindowLoaded(win);
+        });
     });
 }
 
@@ -181,5 +190,8 @@ function onLoggerWindowLoaded(win: any)
 
 window.onload = function ()
 {
-    SetupLogger();
+    window.setTimeout(() =>
+    {
+        SetupLogger();
+    }, timeout);
 };
