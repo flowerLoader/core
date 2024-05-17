@@ -61,9 +61,11 @@ function Apply(patch: FlowerPatch)
             }
         }
 
+        let origRet;
+
         try
         {
-            orig.call(patch.obj, ...args);
+            origRet = orig.call(patch.obj, ...args);
         }
         catch (e)
         {
@@ -71,8 +73,14 @@ function Apply(patch: FlowerPatch)
             return;
         }
 
+        /**
+         * Todo: allow postfixes to modify the return data here
+         */
+
         WriteDebug(`Postfixes ${patch.postfixes.length}`);
         patch.postfixes.forEach(postfix => postfix.call(patch.obj, ...args));
+
+        return origRet;
     }
 
     patch.obj[patch.methodName] = wrapper.bind(patch.obj);
