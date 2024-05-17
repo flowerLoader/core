@@ -78,7 +78,19 @@ function Apply(patch: FlowerPatch)
          */
 
         WriteDebug(`Postfixes ${patch.postfixes.length}`);
-        patch.postfixes.forEach(postfix => postfix.call(patch.obj, ...args));
+
+        for (const postfix of patch.postfixes)
+        {
+            try
+            {
+                postfix.call(patch.obj, ...args)
+            }
+            catch (e: any)
+            {
+                WriteLog("Flower", `Failed to run postfix: ${e.message}`);
+            }
+        }
+
 
         return origRet;
     }
