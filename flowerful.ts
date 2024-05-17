@@ -27,9 +27,6 @@ const flowerAPI: FlowerAPI =
     GetGameMain: GetGameMain,
 };
 
-//@ts-ignore
-let GameMain = tWgm;
-
 //All plugins live here
 const Plugins: { [key: string]: IFlowerPlugin } = {};
 
@@ -39,7 +36,8 @@ const Plugins: { [key: string]: IFlowerPlugin } = {};
 
 function GetGameMain()
 {
-    return GameMain;
+    //@ts-ignore
+    return tWgm;
 }
 
 async function LoadAllPlugins()
