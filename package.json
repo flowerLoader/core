@@ -18,6 +18,6 @@
     "typescript-eslint": "^7.9.0"
   },
   "dependencies": {
-    "@flowerloader/api": "^1.0.0"
+    "@flowerloader/api": "file:../../api.next"
   }
 }
