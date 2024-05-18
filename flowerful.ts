@@ -15,7 +15,7 @@ const debuglogging = true;
  * This is how long flower waits in ms before setting up at the start
  * This will need to be configurable on a per-game basis
  */
-const timeout = 75;
+const timeout = 100;
 
 //#region flower_ctor
 
