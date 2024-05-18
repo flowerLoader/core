@@ -32,15 +32,26 @@ function FindPatch(obj: Patchable, method: string)
         obj: obj,
         methodName: method,
         prefixes: [],
-        postfixes: []
+        postfixes: [],
+        applied: false,
     }
 
     patches.push(patch);
     return patch;
 }
 
-function Apply(patch: FlowerPatch)
+/**
+ * Binds a patch to an object. All patches are accumulated even after initial binding.
+ * @param patch 
+ * @returns false if this patch has already been bound
+ */
+function Apply(patch: FlowerPatch): boolean
 {
+
+    /** Only apply patches once ever */
+    if (patch.applied)
+        return false;
+
     /* eslint-disable-next-line @typescript-eslint/ban-types */
     const orig = patch.obj[patch.methodName] as Function;
 
@@ -48,6 +59,8 @@ function Apply(patch: FlowerPatch)
     {
         WriteDebug(`Running detour for ${patch.methodName}`);
         // <-- this = obj
+
+        patch = FindPatch(patch.obj, patch.methodName)!;
 
         WriteDebug(`Prefixes ${patch.prefixes.length}`);
         //patch.prefixes.forEach(prefix => prefix.call(patch.obj, ...args));
@@ -96,8 +109,17 @@ function Apply(patch: FlowerPatch)
     }
 
     patch.obj[patch.methodName] = wrapper.bind(patch.obj);
+    return true;
 }
 
+/**
+ * Registers a new patch with flower
+ * @param obj any object that contains a method
+ * @param methodName the string name of the method to patch
+ * @param patch a function that runs when the method is called
+ * @param isPrefix if this should run before the method (afterward otherwise)
+ * @returns true on success
+ */
 export function RegisterPatch(obj: Patchable, methodName: string, patch: PatchFn, isPrefix: boolean)
 {
 
@@ -115,5 +137,6 @@ export function RegisterPatch(obj: Patchable, methodName: string, patch: PatchFn
         accum.postfixes.push(patch);
     }
 
+    Apply(accum);
     return true;
 }
