@@ -77,6 +77,7 @@ async function LoadAllPlugins()
 
     }
 
+    //This should be completely redundant now
     ApplyAllPatches();
 }
 
