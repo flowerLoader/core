@@ -8,29 +8,34 @@ import { ApplyAllPatches } from "./flowerful.patches";
 /* Set this to true to get ALL the spammy log messages */
 const debuglogging = true;
 
+type LogCallback = (title: string, message: string) => void;
+
 export class flowerCore<T>
 {
     //All the plugins live here
     Plugins: { [key: string]: IFlowerPlugin } = {};
-    LogCallback: (title: string, message: string) => void;
+    LogCallback: LogCallback;
+    DebugCallback: LogCallback;
+    MyLogSource: LogSource;
     API: FlowerAPI<T>;
+    Debug: boolean = debuglogging;
 
-    LoadAllPlugins = async (plugin_root: string) =>
+    async LoadAllPlugins(plugin_root: string): Promise<void>
     {
         /* eslint-disable-next-line @typescript-eslint/no-var-requires */
         const fs = require('fs');
         const plugin_dir = "${plugin_root}/flower-plugins/";
 
         const files = fs.readdirSync(plugin_dir, {})
-        this.WriteDebug(`Loading ${files.length} plugins`);
+        this.MyLogSource.writeDebug(`Loading ${files.length} plugins`);
 
         for (const file of files)
         {
-            this.WriteDebug(`Loading File: ${file}`);
+            this.MyLogSource.writeDebug(`Loading File: ${file}`);
             await this.LoadPlugin(file);
         }
 
-        this.WriteDebug(`Running awakes for plugins`);
+        this.MyLogSource.writeDebug(`Running awakes for plugins`);
 
         for (const guid in this.Plugins)
         {
@@ -39,7 +44,7 @@ export class flowerCore<T>
                 this.Plugins[guid].Awake();
             } catch (e: any)
             {
-                this.WriteMessage(`Error loading ${guid}: ${e.message}`);
+                this.MyLogSource.write(`Error loading ${guid}: ${e.message}`);
                 delete this.Plugins[guid];
                 //Strech goals: Delete patches from bad boys that fail on Awake()
             }
@@ -50,10 +55,10 @@ export class flowerCore<T>
         ApplyAllPatches();
     }
 
-    LoadPlugin = async (file: string) =>
+    async LoadPlugin(file: string): Promise<void>
     {
         const filePath = `./flower-plugins/${file}`
-        this.WriteMessage(`Importing ${filePath}`);
+        this.MyLogSource.write(`Importing ${filePath}`);
 
         try
         {
@@ -70,17 +75,17 @@ export class flowerCore<T>
                 if (!this.Plugins[meta.GUID])
                 {
                     //Squawk
-                    this.WriteDebug(`Registering ${meta.GUID}`);
+                    this.MyLogSource.writeDebug(`Registering ${meta.GUID}`);
 
                     //Check plugin is enabled
                     if (!meta.ENABLED)
                     {
-                        this.WriteDebug("Skipping, plugin is disabled");
+                        this.MyLogSource.writeDebug("Skipping, plugin is disabled");
                         return;
                     }
 
                     //Where the magic happens
-                    const plugin = new pluginConstructor(this.API, new LogSource(meta.GUID, this.WriteMessage));
+                    const plugin = new pluginConstructor(this.API, new LogSource(meta.GUID, this.LogCallback, this.DebugCallback));
 
                     this.Plugins[meta.GUID] = plugin;
 
@@ -97,28 +102,17 @@ export class flowerCore<T>
         /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
         catch (e: any)
         {
-            this.WriteMessage(`Error loading: ${e.message}`);
+            this.MyLogSource.write(`Error loading: ${e.message}`);
             return;
         }
 
     }
 
-    WriteMessage = (message: string) =>
-    {
-        this.LogCallback("Flower", message)
-    }
-
-    WriteDebug = (message: string) =>
-    {
-        if (!debuglogging)
-            return;
-
-        this.LogCallback("Flower Debug", message);
-    }
-
-    constructor(LogDest: (title: string, message: string) => void, API: FlowerAPI<T>)
+    constructor(LogDest: LogCallback, DebugDest: LogCallback, API: FlowerAPI<T>, LogSource: LogSource)
     {
         this.LogCallback = LogDest;
+        this.DebugCallback = DebugDest;
+        this.MyLogSource = LogSource;
         this.API = API;
     }
 }
