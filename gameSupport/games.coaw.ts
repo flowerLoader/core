@@ -1,7 +1,6 @@
 // --- @flowerloader/types ---
 
-import { FlowerAPI } from "@flowerloader/api";
-import { RegisterPatch } from "../flowerful.patches";
+import { FlowerAPI, LogSource } from "@flowerloader/api";
 import { GameDataCOAW, tGameMain } from "@flowerloader/coawtypes";
 import { flowerCore } from "../flowerful";
 
@@ -22,12 +21,15 @@ declare const tWgm: tGameMain;
 
 const flowerAPI: FlowerAPI<GameDataCOAW> = {
     GetGameMain: () => { return { tGameMain: tWgm } },
-    RegisterPatch: RegisterPatch,
+    RegisterPatch(obj, methodName, patch, isPrefix)
+    {
+        throw new Error("Not implemented");
+    },
 }
 
-let core: flowerCore<GameDataCOAW> = new flowerCore(WriteLog, flowerAPI)
+let core: flowerCore<GameDataCOAW> = new flowerCore(new LogSource("Flower", WriteLog, WriteDebug), flowerAPI)
 
-export function WriteLog(title: string, message: string)
+function WriteLog(title: string, message: string)
 {
 
     const logBody = logger.window.document.getElementById("log-body");
@@ -37,8 +39,15 @@ export function WriteLog(title: string, message: string)
                         <div class="body">${message}</div>`;
 
     logBody?.insertBefore(el, logBody.firstChild)
-
 }
+
+function WriteDebug(title: string, message: string)
+{
+    if (core.Debug)
+        WriteLog("DEBUG ${title}", message);
+}
+
+
 
 function SetupLogger()
 {
