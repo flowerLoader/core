@@ -3,7 +3,7 @@
  */
 
 import { FlowerAPI, IFlowerPlugin, isModule, LogSource } from "@flowerloader/api";
-import { ApplyAllPatches } from "./flowerful.patches";
+import { flowerPatcher } from "./flowerful.patches";
 
 /* Set this to true to get ALL the spammy log messages */
 const debuglogging = true;
@@ -14,9 +14,8 @@ export class flowerCore<T>
 {
     //All the plugins live here
     Plugins: { [key: string]: IFlowerPlugin } = {};
-    LogCallback: LogCallback;
-    DebugCallback: LogCallback;
     MyLogSource: LogSource;
+    Patcher: flowerPatcher;
     API: FlowerAPI<T>;
     Debug: boolean = debuglogging;
 
@@ -52,7 +51,7 @@ export class flowerCore<T>
         }
 
         //This should be completely redundant now
-        ApplyAllPatches();
+        this.Patcher.ApplyAllPatches();
     }
 
     async LoadPlugin(file: string): Promise<void>
@@ -85,7 +84,7 @@ export class flowerCore<T>
                     }
 
                     //Where the magic happens
-                    const plugin = new pluginConstructor(this.API, new LogSource(meta.GUID, this.LogCallback, this.DebugCallback));
+                    const plugin = new pluginConstructor(this.API, new LogSource(meta.GUID, this.MyLogSource.writer, this.MyLogSource.debugWriter));
 
                     this.Plugins[meta.GUID] = plugin;
 
@@ -108,11 +107,13 @@ export class flowerCore<T>
 
     }
 
-    constructor(LogDest: LogCallback, DebugDest: LogCallback, API: FlowerAPI<T>, LogSource: LogSource)
+    constructor(LogSource: LogSource, API: FlowerAPI<T>)
     {
-        this.LogCallback = LogDest;
-        this.DebugCallback = DebugDest;
         this.MyLogSource = LogSource;
+        this.Patcher = new flowerPatcher(this.MyLogSource);
+
+        //API nonsense
+        API.RegisterPatch = this.Patcher.RegisterPatch;
         this.API = API;
     }
 }
