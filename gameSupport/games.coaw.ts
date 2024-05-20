@@ -44,7 +44,7 @@ function WriteLog(title: string, message: string)
 function WriteDebug(title: string, message: string)
 {
     if (core.Debug)
-        WriteLog("DEBUG ${title}", message);
+        WriteLog(`DEBUG ${title}`, message);
 }
 
 

@@ -6,7 +6,7 @@ import { FlowerAPI, IFlowerPlugin, isModule, LogSource } from "@flowerloader/api
 import { flowerPatcher } from "./flowerful.patches";
 
 /* Set this to true to get ALL the spammy log messages */
-const debuglogging = true;
+const debuglogging = false;
 
 type LogCallback = (title: string, message: string) => void;
 
@@ -23,7 +23,7 @@ export class flowerCore<T>
     {
         /* eslint-disable-next-line @typescript-eslint/no-var-requires */
         const fs = require('fs');
-        const plugin_dir = "${plugin_root}/flower-plugins/";
+        const plugin_dir = `${plugin_root}/flower-plugins/`;
 
         const files = fs.readdirSync(plugin_dir, {})
         this.MyLogSource.writeDebug(`Loading ${files.length} plugins`);
