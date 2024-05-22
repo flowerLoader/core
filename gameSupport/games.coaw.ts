@@ -5,6 +5,26 @@ import { GameDataCOAW, tGameMain } from "@flowerloader/coawtypes";
 import { flowerCore } from "../flowerful";
 
 /**
+ * Returns the platform specific game location
+ */
+function GetGameRoot(): string
+{
+    //chrome-extension://eobfdhbhahidclhbabnladfbafcbfdmn/gamedata/game/flower/flower-plugins/
+    //Get the window location
+    let base = nw.Window.get().window.location.toString()
+    console.log(base)
+
+    base = base.replace("index.html", "")
+    console.log(base)
+
+    //@ts-ignore
+    base = base.replace("chrome-extension://eobfdhbhahidclhbabnladfbafcbfdmn", nw.global.__dirname);
+    console.log(base)
+
+    return base
+}
+
+/**
  * This is how long flower waits in ms before setting up at the start
  * This will need to be configurable on a per-game basis
  */
@@ -16,7 +36,6 @@ const timeout = 100;
 let logger: any = {} as { window: Window };
 
 /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-declare const nw: any;
 declare const tWgm: tGameMain;
 
 const flowerAPI: FlowerAPI<GameDataCOAW> = {
@@ -52,8 +71,9 @@ function WriteDebug(title: string, message: string)
 function SetupLogger()
 {
     //Logger window
-    const url = "file:///" + nw.global.__dirname + "/gamedata/game/logger.html";
-    nw.Window.open(url, {
+    const url = GetGameRoot() + "flower/logger.html";
+
+    nw.Window.open("file:///" + url, {
         /*frame: debbug,*/
         width: 600,
         height: 800,
@@ -74,7 +94,8 @@ function onLoggerWindowLoaded(win: any)
     //win.window.document.body.innerHTML += "<h2>Executable Started</h2>";
 
     //Start patchloading here
-    core.LoadAllPlugins(nw.global.__dirname + "/gamedata/game/js/game");
+    const url = GetGameRoot() + "flower"
+    core.LoadAllPlugins(url);
 }
 
 window.onload = function ()
