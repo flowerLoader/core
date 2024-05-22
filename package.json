@@ -15,7 +15,9 @@
     "eslint": "^8.57.0",
     "globals": "^15.2.0",
     "typescript": "^5.4.5",
-    "typescript-eslint": "^7.9.0"
+    "typescript-eslint": "^7.9.0",
+    "@types/nw.gui": "^0.0.25",
+    "@types/nw.js": "^0.13.21"
   },
   "dependencies": {
     "@flowerloader/api": "^1.2.0",
