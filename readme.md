@@ -60,11 +60,14 @@ You should see the files `index.html` and `empty.html`. This folder is your base
 3. Copy the contents of your release zip directly into the base install directory. You should now have `logger.html` and `logger.css` alongside the files `index.html` and `empty.html` from before like so:
    
 ```plaintext
-- base_install_directory
 +- logger.html
 +- logger.css
 +- index.html
-+- empty.html
+++ flower
+ +- flowerful.js
+ ++ flower-plugins
+  +- feed_me_plugins
+
 <There will be more folders and files>
 ```
 
@@ -75,12 +78,12 @@ You should see the files `index.html` and `empty.html`. This folder is your base
 Add a reference to flower.js directly below that line so it looks like the following:
 ```html
 <script src="./js/game/union.js"></script>
-<script type="module" src="./js/game/flowerful.js"></script>
+<script type="module" src="./flower/flowerful.js"></script>
 ```
 
 Congrats, Flower is now installed!
 
-Flower keeps its plugins in the folder `js/game/flower-plugins/` under your base install directory. You can copy in any plugins you wish to use into this directory and flower will find them automatically. If flower reports that a plugin you want to use is disabled, you can edit the JS file and set `enabled=true` on the plugin's meta information. You can also do the opposite if you wish to disable a plugin without deleting it from your plugins folder.
+Flower keeps its plugins in the folder `/flower/flower-plugins/` under your base install directory. You can copy in any plugins you wish to use into this directory and flower will find them automatically. If flower reports that a plugin you want to use is disabled, you can edit the JS file and set `enabled=true` on the plugin's meta information. You can also do the opposite if you wish to disable a plugin without deleting it from your plugins folder.
 
 ### From Source
 
