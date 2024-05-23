@@ -48,6 +48,7 @@ const flowerAPI: FlowerAPI<GameDataCOAW> = {
 
 let core: flowerCore<GameDataCOAW> = new flowerCore(new LogSource("Flower", WriteLog, WriteDebug), flowerAPI)
 
+/*
 function WriteLog(title: string, message: string)
 {
 
@@ -58,6 +59,15 @@ function WriteLog(title: string, message: string)
                         <div class="body">${message}</div>`;
 
     logBody?.insertBefore(el, logBody.firstChild)
+}
+*/
+
+function WriteLog(title: string, message: string)
+{
+    var fs = require('fs')
+
+    var log = fs.openSync('flower.log', 'a')
+    fs.writeSync(log, `${title}: ${message}\n`)
 }
 
 function WriteDebug(title: string, message: string)
