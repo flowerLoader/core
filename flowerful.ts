@@ -114,7 +114,7 @@ export class flowerCore<T>
         this.Patcher = new flowerPatcher(this.MyLogSource);
 
         //API nonsense
-        API.RegisterPatch = this.Patcher.RegisterPatch;
+        API.RegisterPatch = this.Patcher.RegisterPatch.bind(this.Patcher);
         this.API = API;
     }
 }
