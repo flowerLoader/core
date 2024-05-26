@@ -99,4 +99,5 @@ window.onload = function ()
     }, timeout);
 };
 
-export default function GetFlowerAPI() { return flowerAPI }
+//pretty sure we don't need this
+//export default function GetFlowerAPI() { return flowerAPI }
