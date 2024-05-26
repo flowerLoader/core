@@ -21,11 +21,11 @@ export class flowerCore<T>
 
     async LoadAllPlugins(plugin_root: string): Promise<void>
     {
-        /* eslint-disable-next-line @typescript-eslint/no-var-requires */
-        const fs = require('fs');
-        const plugin_dir = `${plugin_root}/flower-plugins/`;
+        // load json from local file
+        const str = `./config.js`
+        const js = await import(str);
 
-        const files = fs.readdirSync(plugin_dir, {})
+        const files: string[] = js.ENABLED_PLUGINS;
         this.MyLogSource.writeDebug(`Loading ${files.length} plugins`);
 
         for (const file of files)

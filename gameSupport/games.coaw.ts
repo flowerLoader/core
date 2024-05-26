@@ -48,10 +48,8 @@ const flowerAPI: FlowerAPI<GameDataCOAW> = {
 
 let core: flowerCore<GameDataCOAW> = new flowerCore(new LogSource("Flower", WriteLog, WriteDebug), flowerAPI)
 
-/*
 function WriteLog(title: string, message: string)
 {
-
     const logBody = logger.window.document.getElementById("log-body");
     const el = logger.window.document.createElement("div");
     el.className = "log-entry"
@@ -59,15 +57,6 @@ function WriteLog(title: string, message: string)
                         <div class="body">${message}</div>`;
 
     logBody?.insertBefore(el, logBody.firstChild)
-}
-*/
-
-function WriteLog(title: string, message: string)
-{
-    var fs = require('fs')
-
-    var log = fs.openSync('flower.log', 'a')
-    fs.writeSync(log, `${title}: ${message}\n`)
 }
 
 function WriteDebug(title: string, message: string)
@@ -81,18 +70,13 @@ function WriteDebug(title: string, message: string)
 function SetupLogger()
 {
     //Logger window
-    const url = GetGameRoot() + "flower/logger.html";
+    const url = "./flower/logger.html";
 
-    nw.Window.open("file:///" + url, {
-        /*frame: debbug,*/
-        width: 600,
-        height: 800,
-        /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-    }, function (win: any)
+    const win = window.open(url, 'Logger', 'popup=1,width=600,height=800')
+    win!.addEventListener('load', function ()
     {
-        win.once('loaded', function ()
-        {
-            onLoggerWindowLoaded(win);
+        onLoggerWindowLoaded({
+            window: win,
         });
     });
 }
@@ -104,8 +88,7 @@ function onLoggerWindowLoaded(win: any)
     //win.window.document.body.innerHTML += "<h2>Executable Started</h2>";
 
     //Start patchloading here
-    const url = GetGameRoot() + "flower"
-    core.LoadAllPlugins(url);
+    core.LoadAllPlugins("./flower");
 }
 
 window.onload = function ()
