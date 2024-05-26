@@ -44,8 +44,9 @@ export class flowerCore<T>
             } catch (e: any)
             {
                 this.MyLogSource.write(`Error loading ${guid}: ${e.message}`);
+
+                //Delete patches from bad boys that fail on Awake()
                 delete this.Plugins[guid];
-                //Strech goals: Delete patches from bad boys that fail on Awake()
             }
 
         }
