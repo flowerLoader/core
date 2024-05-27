@@ -57,14 +57,18 @@ To find Your base install directory right click on steam and select Manage>Brows
 You should see the files `index.html` and `empty.html`. This folder is your base install directory. All instructions will be given with this folder as the root in mind.
 </details>
 
-3. Copy the contents of your release zip directly into the base install directory. You should now have `logger.html` and `logger.css` alongside the files `index.html` and `empty.html` from before like so:
+3. Copy the contents of your release zip directly into the base install directory. You should now have a `flower` folder alongside the files `index.html` and `empty.html` from before like so:
    
 ```plaintext
-- base_install_directory
 +- logger.html
 +- logger.css
 +- index.html
-+- empty.html
+++ flower
+ +- flowerful.js
+ +- config.js
+ ++ flower-plugins
+  +- feed_me_plugins
+
 <There will be more folders and files>
 ```
 
@@ -72,15 +76,15 @@ You should see the files `index.html` and `empty.html`. This folder is your base
 ```html
 <script src="./js/game/union.js"></script>
 ```
-Add a reference to flower.js directly below that line so it looks like the following:
+Add a reference to flowerful.js directly below that line so it looks like the following:
 ```html
 <script src="./js/game/union.js"></script>
-<script type="module" src="./js/game/flowerful.js"></script>
+<script type="module" src="./flower/flowerful.js"></script>
 ```
 
 Congrats, Flower is now installed!
 
-Flower keeps its plugins in the folder `js/game/flower-plugins/` under your base install directory. You can copy in any plugins you wish to use into this directory and flower will find them automatically. If flower reports that a plugin you want to use is disabled, you can edit the JS file and set `enabled=true` on the plugin's meta information. You can also do the opposite if you wish to disable a plugin without deleting it from your plugins folder.
+Flower keeps its plugins in the folder `/flower/flower-plugins/` under your base install directory. You can copy in any plugins you wish to use into this directory and then add them to the config.js file to use them. If flower reports that a plugin you want to use is disabled, you can edit the JS file and set `enabled=true` on the plugin's meta information. You can also do the opposite if you wish to disable a plugin without deleting it from your plugins folder or config.js.
 
 ### From Source
 
@@ -122,7 +126,7 @@ You can simply run the build task from VSCode if you're using it or run the esbu
 npx esbuild --bundle flowerful.ts --format=esm --outdir=build/ --platform=node
 ```
 
-You will then need to copy the resulting `flowerful.js` file into your base install directory under `/js/game/` alongside `union.js`. In the same location you will need a `flower-plugins` folder for your plugins. Finally, you will need to copy `logger.html` and `logger.css` into your base install directory and configure you `index.html`.
+After compilation is complete, navigate to the base install directory and then `/flower` under that, creating it if it does not already exist. You will want to copy the following files to this location: `flowerful.js` `logger.html` and `logger.css` and finally create a folder called `flower-plugins` if it does not exist. You will also need a `config.js` file that lists the plugins flower will load. If you don't already have one from a previous install you can copy a blank one from the `/build` folder in the project.
 
 For more information on your base install directory and how to configure `index.html` see [Manual install instructions](#from-a-released-version)
 
@@ -139,5 +143,9 @@ We welcome contributions! More information will be added soon!
   - The simplest and fastest way is to run `verify game files` for the game on steam.
   - Alternatively, you may remove the line you added to `index.html` and flower will no longer be loaded.
   - Finally, either way, you may remove all the files you copied in to your base game directory or leave them, they won't be loaded or effect the game in any way anymore
+  
+- **How do I configure what plugins Flower loads?**
+  - Simply edit the `config.js` file under your base install directory in the `flower` folder. There are comments inside this file that explain how to set flower to load plugins.
+   
 
 - More troubleshooting tips and frequently asked questions will be added soon.
