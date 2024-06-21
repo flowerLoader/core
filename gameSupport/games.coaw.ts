@@ -17,7 +17,6 @@ function GetGameRoot(): string
     base = base.replace("index.html", "")
     console.log(base)
 
-    //@ts-ignore
     base = base.replace("chrome-extension://eobfdhbhahidclhbabnladfbafcbfdmn", nw.global.__dirname);
     console.log(base)
 
@@ -28,7 +27,7 @@ function GetGameRoot(): string
  * This is how long flower waits in ms before setting up at the start
  * This will need to be configurable on a per-game basis
  */
-const timeout = 100;
+const timeout = 500;
 
 /**
  * This is where we store the logger window for coaw
