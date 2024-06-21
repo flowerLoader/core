@@ -7,6 +7,8 @@ import { flowerCore } from "../flowerful";
 /**
  * Returns the platform specific game location
  */
+// This is only used in plugins and will always throw an unused error if not ignored
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function GetGameRoot(): string
 {
     //chrome-extension://eobfdhbhahidclhbabnladfbafcbfdmn/gamedata/game/flower/flower-plugins/
@@ -17,6 +19,7 @@ function GetGameRoot(): string
     base = base.replace("index.html", "")
     console.log(base)
 
+    //@ts-expect-error Global does exist, the defs are wrong but we don't control the defs
     base = base.replace("chrome-extension://eobfdhbhahidclhbabnladfbafcbfdmn", nw.global.__dirname);
     console.log(base)
 
@@ -32,6 +35,8 @@ const timeout = 500;
 /**
  * This is where we store the logger window for coaw
  */
+// this is jank but its how we define the window to get TS support
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 let logger: any = {} as { window: Window };
 
 /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
@@ -39,13 +44,16 @@ declare const tWgm: tGameMain;
 
 const flowerAPI: FlowerAPI<GameDataCOAW> = {
     GetGameMain: () => { return { tGameMain: tWgm } },
+
+    // This is only used in plugins and will always throw an unused error if not ignored
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     RegisterPatch(obj, methodName, patch, isPrefix)
     {
         throw new Error("Not implemented");
     },
 }
 
-let core: flowerCore<GameDataCOAW> = new flowerCore(new LogSource("Flower", WriteLog, WriteDebug), flowerAPI)
+const core: flowerCore<GameDataCOAW> = new flowerCore(new LogSource("Flower", WriteLog, WriteDebug), flowerAPI)
 
 function WriteLog(title: string, message: string)
 {
