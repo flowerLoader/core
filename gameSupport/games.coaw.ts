@@ -126,8 +126,6 @@ function trySetup()
     }
 }
 
-console.log("WAAH");
-console.error("ERROR WAAH");
 trySetup();
 
 //pretty sure we don't need this
