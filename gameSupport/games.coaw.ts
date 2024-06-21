@@ -30,7 +30,8 @@ function GetGameRoot(): string
  * This is how long flower waits in ms before setting up at the start
  * This will need to be configurable on a per-game basis
  */
-const timeout = 500;
+const timeout = 10;
+let loops = 0;
 
 /**
  * This is where we store the logger window for coaw
@@ -94,17 +95,40 @@ function onLoggerWindowLoaded(win: any)
     logger = win;
     //win.window.document.body.innerHTML += "<h2>Executable Started</h2>";
 
+    //Goofy debug
+    WriteLog("Loaded", `Loading took ${loops * timeout}ms to finish`);
+
     //Start patchloading here
     core.LoadAllPlugins("./flower");
 }
 
-window.onload = function ()
+function trySetup()
 {
-    window.setTimeout(() =>
+
+    loops++;
+    //console.log("Checking for setup");
+
+
+    //cancel setup
+    if (tWgm == null || tWgm.tGameCharactor == null)
     {
+        //console.log("Running setup again later");
+        //setup must retry later in the game
+        window.setTimeout(() =>
+        {
+            trySetup();
+        }, timeout);
+    }
+    else
+    {
+        //console.log("Setting up now")
         SetupLogger();
-    }, timeout);
-};
+    }
+}
+
+console.log("WAAH");
+console.error("ERROR WAAH");
+trySetup();
 
 //pretty sure we don't need this
 //export default function GetFlowerAPI() { return flowerAPI }
