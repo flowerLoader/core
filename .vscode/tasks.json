@@ -6,7 +6,7 @@
 		{
 			"label": "esbuild",
 			"type": "shell",
-			"command": "npx esbuild --bundle gameSupport/games.coaw.ts --format=esm --outfile=./build/flowerful.js --platform=node",
+			"command": "npx esbuild --bundle gameSupport/coaw/index.ts --format=esm --outfile=./build/flowerful.js --platform=node",
 			"windows": {
 				"command": ""
 			},
