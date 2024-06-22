@@ -18,6 +18,22 @@
 				"reveal": "always",
 				"panel": "new"
 			}
+		},
+		{
+			"label": "esbuild",
+			"type": "shell",
+			"command": "npx esbuild --bundle gameSupport/none/index.ts --format=esm --outfile=./build/flowerful.js --platform=node",
+			"windows": {
+				"command": ""
+			},
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			},
+			"presentation": {
+				"reveal": "always",
+				"panel": "new"
+			}
 		}
 	]
 }
