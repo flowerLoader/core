@@ -2,7 +2,7 @@
 
 import { FlowerAPI, LogSource } from "@flowerloader/api";
 import { GameDataCOAW, tGameMain } from "@flowerloader/coawtypes";
-import { flowerCore } from "../flowerful";
+import { flowerCore } from "../../flowerful";
 
 /**
  * Returns the platform specific game location
