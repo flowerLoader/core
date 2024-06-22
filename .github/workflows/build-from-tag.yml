@@ -36,7 +36,7 @@ jobs:
       - run: cp "./build/flowerful.js" "./flower/flowerful.js" && cp "build/config.js" "./flower/config.js" && cp "license" "./flower/license" && cp "readme.md" "./flower/readme.md"
         name: Copy flower core files to staging directory
 
-      - run: cp "./gameSupport/${{matrix.game}}/static/*" "./flower/"
+      - run: cp ./gameSupport/${{matrix.game}}/static/* "./flower/"
         name: Copy specific logger to staging directory
 
       - run: zip -r "flower-core-${{matrix.game}}.zip" "./flower"
