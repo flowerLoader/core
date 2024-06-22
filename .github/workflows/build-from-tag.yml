@@ -12,7 +12,7 @@ jobs:
 
     strategy:
       matrix:
-        game: [CoaW]
+        game: [coaw, none]
 
     steps:
       - uses: actions/checkout@v4
@@ -45,8 +45,9 @@ jobs:
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: "flower-core-CoaW.zip"
-          path: "flower-core-CoaW.zip"
+          name: "flower-core-${{matrix.game}}.zip"
+          path: "flower-core-${{matrix.game}}.zip"
+          if-no-files-found: error
 
   release:
     name: Create Release
