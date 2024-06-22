@@ -45,7 +45,7 @@ jobs:
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: "flower-core-${{matrix.game}}.zip"
+          name: "${{matrix.game}}"
           path: "flower-core-${{matrix.game}}.zip"
           if-no-files-found: error
 
@@ -61,6 +61,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           path: "./downloads"
+          merge-multiple: true
 
       - name: Upload Binaries
         env:
