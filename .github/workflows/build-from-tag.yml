@@ -1,0 +1,73 @@
+name: Build from tag
+
+on:
+  push:
+    tags:
+      - v*
+
+jobs:
+  build:
+    name: Build and package release
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        game: [coaw, none]
+
+    steps:
+      - uses: actions/checkout@v4
+        name: Checkout Branch
+
+      - uses: actions/setup-node@v4
+        name: Setup Node @ v16
+        with:
+          node-version: 16
+          cache: "npm"
+
+      - run: npm ci
+        name: update npm packages
+
+      - run: npx esbuild --bundle gameSupport/${{matrix.game}}/index.ts --format=esm --outfile=./build/flowerful.js --platform=node
+        name: build project with esbuild
+
+      - run: mkdir -p ./flower/flower-plugins && echo "PLUGINS GO HERE" > ./flower/flower-plugins/feed-me-plugins
+        name: Create directory structure for bundling
+
+      - run: cp "./build/flowerful.js" "./flower/flowerful.js" && cp "build/config.js" "./flower/config.js" && cp "license" "./flower/license" && cp "readme.md" "./flower/readme.md"
+        name: Copy flower core files to staging directory
+
+      - run: cp "./gameSupport/${{matrix.game}}/static/*" "./flower/"
+        name: Copy specific logger to staging directory
+
+      - run: zip -r "flower-core-${{matrix.game}}.zip" "./flower"
+        name: Compress all artifacts
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: "flower-core-${{matrix.game}}.zip"
+          path: "flower-core-${{matrix.game}}.zip"
+          if-no-files-found: error
+
+  release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    needs: [build]
+
+    steps:
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: "./downloads"
+
+      - name: Upload Binaries
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          tagname="${GITHUB_REF#refs/tags/}"
+          echo "Tag name is $tagname"
+          ls -lR "./downloads"
+          echo "Uploading release assets..."
+          gh release create "$tagname" -t "$tagname" ./downloads*
