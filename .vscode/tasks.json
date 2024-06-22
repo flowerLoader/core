@@ -4,7 +4,7 @@
 	"version": "2.0.0",
 	"tasks": [
 		{
-			"label": "esbuild",
+			"label": "Build CoaW",
 			"type": "shell",
 			"command": "npx esbuild --bundle gameSupport/coaw/index.ts --format=esm --outfile=./build/flowerful.js --platform=node",
 			"windows": {
@@ -12,7 +12,7 @@
 			},
 			"group": {
 				"kind": "build",
-				"isDefault": true
+				"isDefault": false
 			},
 			"presentation": {
 				"reveal": "always",
@@ -20,7 +20,7 @@
 			}
 		},
 		{
-			"label": "esbuild",
+			"label": "Build None",
 			"type": "shell",
 			"command": "npx esbuild --bundle gameSupport/none/index.ts --format=esm --outfile=./build/flowerful.js --platform=node",
 			"windows": {
@@ -28,7 +28,7 @@
 			},
 			"group": {
 				"kind": "build",
-				"isDefault": true
+				"isDefault": false
 			},
 			"presentation": {
 				"reveal": "always",
