@@ -75,4 +75,4 @@ jobs:
           echo "Tag name is $tagname"
           ls -lR "./downloads"
           echo "Uploading release assets..."
-          gh release create "$tagname" -t "$tagname" ./downloads*
+          gh release create "$tagname" -t "$tagname" ./downloads/*
