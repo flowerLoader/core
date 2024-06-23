@@ -14,6 +14,11 @@
 
   - [Installing From a Released
     version](#installing-from-a-released-version)
+  - [Known Issues and Workarounds](#known-issues-and-workarounds)
+      - [Windows Specific Launch
+        Options](#windows-specific-launch-options)
+      - [How to Launch the Game Without
+        Steam](#how-to-launch-the-game-without-steam)
   - [Contributing](#contributing)
   - [FAQ & Troubleshooting](#faq--troubleshooting)
 
@@ -98,6 +103,40 @@ your base install directory. You can copy in any plugins you wish to use
 into this directory and then add them to the `config.js` file to use
 them. You can also do the opposite if you wish to disable a plugin
 without deleting it from your plugins folder.
+
+## Known Issues and Workarounds
+
+### Windows Specific Launch Options
+
+The windows version has additional arguments you will need to use to
+allow Flower to load and/or enable the dev tools (for debugging). Create
+a file called `launch.bat` in your game directory (right click -\>
+browse local files) and paste in the following:
+
+``` bat
+@echo off
+set WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS="--allow-file-access-from-files"
+Game.exe
+```
+
+Then, back in your steam library set the game's command line arguments
+to `launch.bat %command%`
+
+This is currently a work-around for windows not properly setting
+environment variables when steam launches a game and we plan to find a
+better solution for the future.
+
+### How to Launch the Game Without Steam
+
+If you wish to launch the game without steam you simply need to create a
+file in the game directory (right click -\> browse local files) called
+`steam_appid.txt` and paste the game's steam id inside.
+
+`2761610`
+
+There should be no other spaces or lines in this file, just the ID. Now
+you can launch the game by double-clicking the exe without steam or by
+using the shell to pass env variables as needed.
 
 ## Contributing
 
