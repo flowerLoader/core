@@ -30,6 +30,9 @@
 [![Steam](https://img.shields.io/badge/Steam-Creator_Of_Another_World-1b2838?style=for-the-badge&logo=steam)](https://store.steampowered.com/app/2761610/Creator_of_Another_World/)  
 by [kuetaro (くえたろう)](https://store.steampowered.com/curator/44822906)
 
+[![Steam](https://img.shields.io/badge/Steam-Golden_Crone_Hotel-1b2838?style=for-the-badge&logo=steam)](https://store.steampowered.com/app/497800/Golden_Krone_Hotel/)  
+by [Vulgat](https://store.steampowered.com/curator/33977309)
+
 ## Installing Flowerloader From a Release
 
 For installation instructions, see the readme file for the specific
@@ -39,6 +42,7 @@ supported title.
 <summary>Supported Titles</summary>
 
   - [Creator of Another World](gameSupport/coaw/static/readme.md)
+  - [Golden Crone Hotel](gameSupport/goldhotel/static/readme.md)
   - [Generic](gameSupport/none/static/readme.md)
 
 </details>
