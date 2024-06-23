@@ -33,7 +33,7 @@ jobs:
       - run: mkdir -p ./flower/flower-plugins && echo "PLUGINS GO HERE" > ./flower/flower-plugins/feed-me-plugins
         name: Create directory structure for bundling
 
-      - run: cp "./build/flowerful.js" "./flower/flowerful.js" && cp "build/config.js" "./flower/config.js" && cp "license" "./flower/license" && cp "readme.md" "./flower/readme.md"
+      - run: cp "./build/flowerful.js" "./flower/flowerful.js" && cp "build/config.js" "./flower/config.js" && cp "license" "./flower/license"
         name: Copy flower core files to staging directory
 
       - run: cp ./gameSupport/${{matrix.game}}/static/* "./flower/"
