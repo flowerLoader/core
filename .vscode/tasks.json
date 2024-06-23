@@ -7,9 +7,19 @@
 			"label": "Build CoaW",
 			"type": "shell",
 			"command": "npx esbuild --bundle gameSupport/coaw/index.ts --format=esm --outfile=./build/flowerful.js --platform=node",
-			"windows": {
-				"command": ""
+			"group": {
+				"kind": "build",
+				"isDefault": false
 			},
+			"presentation": {
+				"reveal": "always",
+				"panel": "new"
+			}
+		},
+		{
+			"label": "Build Golden Krone Hotel",
+			"type": "shell",
+			"command": "npx esbuild --bundle gameSupport/goldhotel/index.ts --format=esm --outfile=./build/flowerful.js --platform=node",
 			"group": {
 				"kind": "build",
 				"isDefault": false
@@ -23,9 +33,6 @@
 			"label": "Build None",
 			"type": "shell",
 			"command": "npx esbuild --bundle gameSupport/none/index.ts --format=esm --outfile=./build/flowerful.js --platform=node",
-			"windows": {
-				"command": ""
-			},
 			"group": {
 				"kind": "build",
 				"isDefault": false
