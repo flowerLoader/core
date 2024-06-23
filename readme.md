@@ -81,17 +81,8 @@ the esbuild command from your terminal if you're not
 npx esbuild --bundle gameSupport/coaw/index.ts --format=esm --outdir=build/ --platform=node
 ```
 
-After compilation is complete, navigate to the base install directory
-and then `/flower` under that, creating it if it does not already exist.
-You will want to copy the following files to this location:
-`flowerful.js` `logger.html` and `logger.css` and finally create a
-folder called `flower-plugins` if it does not exist. You will also need
-a `config.js` file that lists the plugins flower will load. If you don't
-already have one from a previous install you can copy a blank one from
-the `/build` folder in the project.
-
-For more information on your base install directory and how to configure
-`index.html` see [Manual install instructions](#from-a-released-version)
+Your build command will vary based on which game you are building from.
+See the included tasks under `.vscode/tasks.json` for more details.
 
 ## Contributing
 
