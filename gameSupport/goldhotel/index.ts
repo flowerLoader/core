@@ -8,6 +8,7 @@ import { flowerCore } from "../../flowerful";
  * This will need to be configurable on a per-game basis
  */
 const timeout = 10;
+let loops = 0;
 
 /**
  * This is where we store the logger window
@@ -16,9 +17,13 @@ const timeout = 10;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 let logger: any = {} as { window: Window };
 
+declare const game: { "version": string };
 
 const flowerAPI: FlowerAPI<unknown> = {
-    GetGameMain: () => { throw new Error("No game main defined") },
+    GetGameMain: () =>
+    {
+        return game;
+    },
 
     // This is only used in plugins and will always throw an unused error if not ignored
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -70,7 +75,8 @@ function onLoggerWindowLoaded(win: any)
     //win.window.document.body.innerHTML += "<h2>Executable Started</h2>";
 
     //Goofy debug
-    WriteLog("Loaded", `Loading took ${timeout}ms to finish`);
+    WriteLog("Loaded", `Loading took ${timeout * loops}ms to finish<br />
+                        Running on game version ${game.version}`);
 
     //Start patchloading here
     core.LoadAllPlugins("./flower");
@@ -78,7 +84,25 @@ function onLoggerWindowLoaded(win: any)
 
 function trySetup()
 {
-    SetupLogger();
+    loops++;
+    //console.log("Checking for setup");
+
+
+    //cancel setup
+    if (game == null)
+    {
+        //console.log("Running setup again later");
+        //setup must retry later in the game
+        window.setTimeout(() =>
+        {
+            trySetup();
+        }, timeout);
+    }
+    else
+    {
+        //console.log("Setting up now")
+        SetupLogger();
+    }
 }
 
 trySetup();
